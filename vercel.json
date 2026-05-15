@@ -1,0 +1,11 @@
+{
+  "functions": {
+    "api/transcribe.py": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    { "source": "/api/transcribe", "destination": "/api/transcribe" },
+    { "source": "/", "destination": "/index.html" }
+  ]
+}

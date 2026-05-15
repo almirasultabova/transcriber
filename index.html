@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Транскрибация — SULTANOVA AI</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0d0d1a;
+    color: #f0f0f0;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 680px; margin: 0 auto; padding: 40px 20px; }
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #8000FF, #FF4FF8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 40px; }
+
+  .upload-zone {
+    border: 2px dashed #2a2a4a;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #12122a;
+    margin-bottom: 20px;
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: #8000FF; background: #16163a; }
+  .upload-zone .icon { font-size: 48px; margin-bottom: 16px; }
+  .upload-zone p { color: #aaa; font-size: 15px; }
+  .upload-zone .hint { font-size: 12px; color: #555; margin-top: 8px; }
+  input[type="file"] { display: none; }
+
+  .limit-notice {
+    background: #1a1a2a;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .limit-notice span { color: #8000FF; }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #8000FF, #FF4FF8);
+    color: white;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .file-info {
+    background: #12122a;
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #bbb;
+    display: none;
+  }
+  .file-info span { color: #8000FF; font-weight: 500; }
+  .file-info .size-warn { color: #ff9f43; font-size: 12px; margin-top: 4px; }
+
+  .status {
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    color: #888;
+    display: none;
+  }
+  .spinner {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border: 2px solid #333;
+    border-top-color: #8000FF;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result { display: none; margin-top: 30px; }
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .result-label { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .copy-btn {
+    font-size: 12px;
+    color: #8000FF;
+    background: none;
+    border: 1px solid #8000FF;
+    border-radius: 8px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: #8000FF20; }
+
+  textarea {
+    width: 100%;
+    min-height: 300px;
+    background: #12122a;
+    border: 1px solid #2a2a4a;
+    border-radius: 12px;
+    padding: 20px;
+    color: #eee;
+    font-size: 15px;
+    line-height: 1.7;
+    resize: vertical;
+    font-family: inherit;
+  }
+  textarea:focus { outline: none; border-color: #8000FF40; }
+
+  .download-row { display: flex; gap: 10px; margin-top: 12px; }
+  .dl-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    background: #12122a;
+    color: #ccc;
+  }
+  .dl-btn:hover { border-color: #8000FF; color: #8000FF; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e1e3a;
+    border: 1px solid #8000FF;
+    color: #eee;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    display: none;
+    z-index: 1000;
+  }
+  .error {
+    color: #ff6b6b;
+    background: #1a0a0a;
+    border: 1px solid #ff6b6b44;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    display: none;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Транскрибация</h1>
+  <p class="subtitle">Загрузи аудио или видео — получи чистый текст на русском</p>
+
+  <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div class="icon">🎬</div>
+    <p>Нажми или перетащи файл</p>
+    <p class="hint">MP3, M4A, WAV, OGG, WEBM, MP4, MOV · до 4 МБ</p>
+  </div>
+  <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.m4a,.wav,.ogg,.webm,.mp4,.mov">
+
+  <div class="limit-notice">
+    Лимит файла на Vercel — <span>4 МБ</span> (~2-3 мин аудио).
+    Для длинных записей используй <a href="http://85.198.96.87:7860/transcriber" style="color:#8000FF">версию на сервере</a>.
+  </div>
+
+  <div class="file-info" id="fileInfo">
+    <div>Выбран файл: <span id="fileName"></span></div>
+    <div class="size-warn" id="sizeWarn" style="display:none">⚠️ Файл больше 4 МБ — загрузи на сервере или сожми запись</div>
+  </div>
+
+  <button class="btn btn-primary" id="transcribeBtn" onclick="transcribe()" disabled>
+    Транскрибировать
+  </button>
+
+  <div class="status" id="status">
+    <span class="spinner"></span> Обрабатываю запись...
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="result" id="result">
+    <div class="result-header">
+      <span class="result-label">Транскрипция</span>
+      <button class="copy-btn" onclick="copyText()">Копировать</button>
+    </div>
+    <textarea id="textOutput" placeholder="Здесь появится текст..."></textarea>
+
+    <div class="download-row">
+      <button class="dl-btn" onclick="downloadTxt()">⬇ Скачать TXT</button>
+      <button class="dl-btn" onclick="downloadPdf()">⬇ Скачать PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let selectedFile = null;
+const MAX_SIZE = 4 * 1024 * 1024; // 4MB
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+fileInput.addEventListener('change', e => setFile(e.target.files[0]));
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  setFile(e.dataTransfer.files[0]);
+});
+
+function setFile(file) {
+  if (!file) return;
+  selectedFile = file;
+  document.getElementById('fileName').textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} МБ)`;
+  document.getElementById('fileInfo').style.display = 'block';
+  const warn = document.getElementById('sizeWarn');
+  warn.style.display = file.size > MAX_SIZE ? 'block' : 'none';
+  document.getElementById('transcribeBtn').disabled = file.size > MAX_SIZE;
+}
+
+async function transcribe() {
+  if (!selectedFile) return;
+
+  document.getElementById('status').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('transcribeBtn').disabled = true;
+
+  const form = new FormData();
+  form.append('file', selectedFile);
+
+  try {
+    const res = await fetch('/api/transcribe', { method: 'POST', body: form });
+    let data;
+    try { data = await res.json(); }
+    catch { throw new Error('Сервер вернул неожиданный ответ. Попробуй ещё раз.'); }
+
+    if (!res.ok || data.error) throw new Error(data.error || `Ошибка сервера: ${res.status}`);
+    if (!data.text) throw new Error('Текст не распознан. Проверь что в записи есть речь.');
+
+    document.getElementById('textOutput').value = data.text;
+    document.getElementById('result').style.display = 'block';
+    showToast('Готово! ✓');
+  } catch (e) {
+    const el = document.getElementById('error');
+    el.textContent = '⚠️ ' + e.message;
+    el.style.display = 'block';
+  } finally {
+    document.getElementById('status').style.display = 'none';
+    document.getElementById('transcribeBtn').disabled = false;
+  }
+}
+
+function copyText() {
+  navigator.clipboard.writeText(document.getElementById('textOutput').value)
+    .then(() => showToast('Скопировано ✓'));
+}
+
+function getFileName() {
+  return selectedFile ? selectedFile.name.replace(/\.[^.]+$/, '') : 'транскрипция';
+}
+
+function downloadTxt() {
+  const text = document.getElementById('textOutput').value;
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = getFileName() + '.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('TXT скачан ✓');
+}
+
+function downloadPdf() {
+  const text = document.getElementById('textOutput').value;
+  const name = getFileName();
+  const date = new Date().toLocaleDateString('ru-RU');
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8"><title>${name}</title>
+    <style>
+      body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:0 40px;color:#1a1a1a}
+      h1{font-size:22px;margin-bottom:6px}
+      .meta{color:#888;font-size:13px;margin-bottom:24px;border-bottom:1px solid #ddd;padding-bottom:16px}
+      p{line-height:1.8;font-size:14px;margin-bottom:14px}
+    </style>
+  </head><body>
+    <h1>${name}</h1>
+    <div class="meta">Транскрипция · ${date} · SULTANOVA AI</div>
+    ${text.split('\n\n').map(p => p.trim() ? `<p>${p.replace(/\n/g,'<br>')}</p>` : '').join('')}
+    <script>window.onload=function(){window.print()}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+</script>
+</body>
+</html>

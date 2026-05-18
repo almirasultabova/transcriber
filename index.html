@@ -186,18 +186,12 @@
   <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
     <div class="icon">🎬</div>
     <p>Нажми или перетащи файл</p>
-    <p class="hint">MP3, M4A, WAV, OGG, WEBM, MP4, MOV · до 4 МБ</p>
+    <p class="hint">MP3, M4A, WAV, OGG, WEBM, MP4, MOV · любой размер</p>
   </div>
   <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.m4a,.wav,.ogg,.webm,.mp4,.mov">
 
-  <div class="limit-notice">
-    Лимит файла на Vercel — <span>4 МБ</span> (~2-3 мин аудио).
-    Для длинных записей используй <a href="http://85.198.96.87:7860/transcriber" style="color:#8000FF">версию на сервере</a>.
-  </div>
-
   <div class="file-info" id="fileInfo">
     <div>Выбран файл: <span id="fileName"></span></div>
-    <div class="size-warn" id="sizeWarn" style="display:none">⚠️ Файл больше 4 МБ — загрузи на сервере или сожми запись</div>
   </div>
 
   <button class="btn btn-primary" id="transcribeBtn" onclick="transcribe()" disabled>
@@ -228,7 +222,6 @@
 
 <script>
 let selectedFile = null;
-const MAX_SIZE = 4 * 1024 * 1024; // 4MB
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
@@ -248,9 +241,7 @@ function setFile(file) {
   selectedFile = file;
   document.getElementById('fileName').textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} МБ)`;
   document.getElementById('fileInfo').style.display = 'block';
-  const warn = document.getElementById('sizeWarn');
-  warn.style.display = file.size > MAX_SIZE ? 'block' : 'none';
-  document.getElementById('transcribeBtn').disabled = file.size > MAX_SIZE;
+  document.getElementById('transcribeBtn').disabled = false;
 }
 
 async function transcribe() {

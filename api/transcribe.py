@@ -1,14 +1,23 @@
 import os
 import requests
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = None  # без лимита на размер файла
 
 DEEPGRAM_KEY = os.environ.get("DEEPGRAM_API_KEY", "")
+PASSWORD = os.environ.get("TRANSCRIBER_PASSWORD", "sultanova")
+
+
+def _authenticated():
+    auth = request.authorization
+    return auth and auth.password == PASSWORD
 
 
 @app.route("/api/transcribe", methods=["POST", "OPTIONS"])
 def transcribe():
+    if request.method != "OPTIONS" and not _authenticated():
+        return Response('Access denied', 401, {'WWW-Authenticate': 'Basic realm="Transcriber"'})
     if request.method == "OPTIONS":
         resp = jsonify({})
         resp.headers["Access-Control-Allow-Origin"] = "*"
@@ -43,7 +52,7 @@ def transcribe():
                 "Content-Type": content_type,
             },
             data=audio_data,
-            timeout=60,
+            timeout=600,
         )
         resp.raise_for_status()
         data = resp.json()

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Альмира · 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #F5EDE6; color: #2C2320; font-family: 'Inter', sans-serif; font-weight: 300; padding-bottom: 32px; }
+
+    /* ── STICKY TOP ── */
+    .sticky-top { position: sticky; top: 0; z-index: 100; }
+
+    /* ── HEADER ── */
+    .app-header {
+      background: linear-gradient(135deg, #2C2320 0%, #4A3530 100%);
+      padding: 16px 20px 12px;
+    }
+    .app-header-inner { max-width: 480px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .app-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: #F5EDE6; }
+    .app-badge { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: #B8D8CC; }
+
+    /* ── TOP TABS ── */
+    .top-tabs {
+      background: #2C2320;
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 8px 14px 10px;
+      gap: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .top-tabs::-webkit-scrollbar { display: none; }
+    .nav-item {
+      flex-shrink: 0; display: flex; align-items: center; gap: 5px;
+      padding: 6px 13px; border-radius: 20px;
+      background: transparent; border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 500; color: #7A6370;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .nav-item.active { background: rgba(184,216,204,0.18); border-color: #B8D8CC; color: #B8D8CC; }
+    .nav-icon { font-size: 14px; }
+    .nav-label { font-size: 11px; }
+
+    /* ── PAGES ── */
+    .page { display: none; max-width: 480px; margin: 0 auto; padding: 20px 20px 20px; }
+    .page.active { display: block; }
+
+    /* ── COMMON ── */
+    .section { margin-bottom: 24px; }
+    .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #9B8A90; margin-bottom: 4px; }
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; color: #2C2320; line-height: 1.2; }
+    .divider { width: 28px; height: 1.5px; background: #C4A8B0; margin: 8px 0 14px; }
+
+    .card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(44,35,32,0.06); }
+    .card-label { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: #B8D8CC; margin-bottom: 8px; }
+    .card-label.lilac { color: #C4A8D4; }
+    .card-label.warm  { color: #D4A8A0; }
+    .card-label.teal  { color: #7ABABA; }
+    .card-label.dark  { color: #7A6370; }
+    .card p { font-size: 14px; line-height: 1.7; color: #3A2E2C; }
+
+    .goal-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F8F3F0; }
+    .goal-item:last-child { border-bottom: none; }
+    .dot { width: 6px; height: 6px; min-width: 6px; border-radius: 50%; background: #C4A8B0; margin-top: 7px; }
+    .dot.teal { background: #B8D8CC; }
+    .dot.lilac { background: #C4A8D4; }
+    .dot.warm { background: #D4A8A0; }
+    .dot.moon { background: #7A9BBC; }
+    .goal-text { font-size: 14px; color: #3A2E2C; line-height: 1.55; }
+
+    /* ── PAGE 1: СЕГОДНЯ ── */
+    .today-hero {
+      background: linear-gradient(135deg, #D4C0D8, #B8D8CC);
+      border-radius: 16px; padding: 20px; margin-bottom: 16px; text-align: center;
+    }
+    .today-date { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: #7A6370; margin-bottom: 6px; }
+    .today-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: #2C2320; }
+
+    .habit-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid #F0EAE7; }
+    .habit-row:last-child { border-bottom: none; }
+    .habit-check { width: 22px; height: 22px; min-width: 22px; border-radius: 50%; border: 1.5px solid #C4A8B0; cursor: pointer; position: relative; transition: all 0.2s; flex-shrink: 0; }
+    .habit-check.checked { background: #B8D8CC; border-color: #B8D8CC; }
+    .habit-check.checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #2C2320; font-size: 11px; font-weight: 700; line-height: 1; }
+    .habit-body { flex: 1; }
+    .habit-name { font-size: 14px; color: #2C2320; font-weight: 400; transition: color 0.2s; }
+    .habit-row.done .habit-name { color: #9B8A90; text-decoration: line-through; }
+    .habit-note { font-size: 12px; color: #9B8A90; margin-top: 1px; }
+    .habit-progress { font-size: 11px; font-weight: 500; color: #B8D8CC; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+    .block-card { border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; border-left: 3px solid #D4A8A0; background: #fff; box-shadow: 0 1px 6px rgba(44,35,32,0.05); }
+    .block-trigger { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #D4A8A0; margin-bottom: 5px; }
+    .block-action { font-size: 13px; color: #3A2E2C; line-height: 1.6; }
+
+    .affirmation { background: #2C2320; border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; }
+    .affirmation-num { font-size: 10px; color: #B8D8CC; font-weight: 500; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .affirmation p { font-size: 13px; color: #F5EDE6; line-height: 1.6; }
+
+    .focus-item { display: flex; gap: 14px; background: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 1px 6px rgba(44,35,32,0.05); align-items: flex-start; }
+    .focus-num { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: #D4C0D8; min-width: 26px; line-height: 1.2; }
+    .focus-text { font-size: 14px; color: #2C2320; line-height: 1.5; padding-top: 3px; }
+
+    /* ── PAGE 2: ЦЕЛИ ── */
+    .sphere-card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(44,35,32,0.06); }
+    .sphere-hd { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .sphere-ico { font-size: 20px; }
+    .sphere-ttl { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 500; color: #2C2320; }
+    .sphere-aim { font-size: 12px; color: #7A6370; line-height: 1.6; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #F0EAE7; }
+
+    .vision-box { background: linear-gradient(135deg, #D4C0D8, #B8D8CC); border-radius: 16px; padding: 20px; margin-bottom: 12px; }
+    .vision-text { font-size: 14px; color: #2C2320; line-height: 1.85; }
+
+    /* ── PAGE 3: МЕЧТЫ ── */
+    .dreams-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dream-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 6px rgba(44,35,32,0.05); }
+    .dream-ico { font-size: 20px; margin-bottom: 6px; }
+    .dream-cat { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: #9B8A90; margin-bottom: 5px; }
+    .dream-list { font-size: 12px; color: #3A2E2C; line-height: 1.7; }
+
+    .horizon-card { background: #fff; border-radius: 14px; padding: 16px 18px; margin-bottom: 10px; box-shadow: 0 1px 6px rgba(44,35,32,0.05); }
+    .h-year { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: #C4A8B0; margin-bottom: 2px; }
+    .h-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: #9B8A90; margin-bottom: 8px; }
+    .h-text { font-size: 13px; color: #5A4A48; line-height: 1.65; }
+
+    /* ── PAGE 4: Я ── */
+    .identity-box { background: linear-gradient(135deg, #2C2320, #4A3530); border-radius: 16px; padding: 22px 18px; margin-bottom: 12px; }
+    .id-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: #F5EDE6; margin-bottom: 12px; }
+    .id-line { font-size: 13px; color: #C4B8B0; line-height: 1.8; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .id-line:last-child { border-bottom: none; }
+
+    .values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .val-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 6px rgba(44,35,32,0.05); }
+    .val-word { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: #2C2320; margin-bottom: 3px; }
+    .val-desc { font-size: 12px; color: #7A6370; line-height: 1.5; }
+
+    .strength-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid #F0EAE7; }
+    .strength-item:last-child { border-bottom: none; }
+    .s-ico { font-size: 16px; min-width: 22px; }
+    .s-text { font-size: 13px; color: #3A2E2C; line-height: 1.55; }
+
+    .phrase-box { background: linear-gradient(135deg, #D4C0D8, #B8D8CC); border-radius: 14px; padding: 18px; margin-bottom: 10px; text-align: center; }
+    .phrase-text { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; color: #2C2320; line-height: 1.4; }
+
+    /* ── PAGE 5: ПЛАН ── */
+    .step-item { display: flex; gap: 14px; background: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; box-shadow: 0 1px 6px rgba(44,35,32,0.05); align-items: flex-start; }
+    .step-num { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: #D4C0D8; min-width: 26px; line-height: 1.2; }
+    .step-body { padding-top: 2px; }
+    .step-title { font-size: 14px; font-weight: 500; color: #2C2320; margin-bottom: 3px; }
+    .step-desc { font-size: 12px; color: #7A6370; line-height: 1.5; }
+
+    .pillar-card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 6px rgba(44,35,32,0.05); }
+    .p-num { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: #C4A8D4; margin-bottom: 3px; }
+    .p-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: #2C2320; margin-bottom: 6px; }
+    .p-text { font-size: 13px; color: #5A4A48; line-height: 1.6; }
+    .p-ideas { margin-top: 8px; padding-top: 8px; border-top: 1px solid #F0EAE7; }
+    .p-idea { font-size: 12px; color: #7A6370; padding: 2px 0; }
+
+    .rest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .rest-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 6px rgba(44,35,32,0.05); }
+    .rest-ico { font-size: 18px; margin-bottom: 5px; }
+    .rest-lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #9B8A90; margin-bottom: 5px; }
+    .rest-text { font-size: 12px; color: #3A2E2C; line-height: 1.55; }
+
+    /* viz */
+    .viz-box { background: linear-gradient(135deg, #4A3530, #2C2320); border-radius: 14px; padding: 18px; margin-top: 10px; }
+    .viz-text { font-size: 13px; color: #D4C0B8; line-height: 1.9; }
+
+    /* ── ACCORDION ── */
+    .section-header { cursor: pointer; user-select: none; -webkit-user-select: none; display: flex; flex-direction: column; }
+    .section-title-row { display: flex; align-items: center; justify-content: space-between; }
+    .section-arrow { font-size: 14px; color: #C4A8B0; transition: transform 0.3s ease; display: inline-block; margin-left: 8px; flex-shrink: 0; }
+    .section-arrow.closed { transform: rotate(-90deg); }
+    .section-body { overflow: hidden; transition: max-height 0.4s ease, opacity 0.25s ease; max-height: 3000px; opacity: 1; }
+    .section-body.closed { max-height: 0 !important; opacity: 0; }
+  </style>
+</head>
+<body>
+
+<div class="sticky-top">
+<div class="app-header">
+  <div class="app-header-inner">
+    <div>
+      <div class="app-title">Альмира 2026</div>
+      <div id="app-countdown" style="font-size:10px; color:#B8D8CC; letter-spacing:0.08em; margin-top:2px;"></div>
+    </div>
+    <div class="app-badge">SULTANOVA AI ✦</div>
+  </div>
+</div>
+<nav class="top-tabs">
+  <button class="nav-item active" onclick="switchTab('today', this)"><span class="nav-icon">🌅</span><span class="nav-label">Сегодня</span></button>
+  <button class="nav-item" onclick="switchTab('goals', this)"><span class="nav-icon">🎯</span><span class="nav-label">Цели</span></button>
+  <button class="nav-item" onclick="switchTab('dreams', this)"><span class="nav-icon">✨</span><span class="nav-label">Мечты</span></button>
+  <button class="nav-item" onclick="switchTab('me', this)"><span class="nav-icon">💫</span><span class="nav-label">Я</span></button>
+  <button class="nav-item" onclick="switchTab('plan', this)"><span class="nav-icon">📋</span><span class="nav-label">План</span></button>
+  <button class="nav-item" onclick="switchTab('solstice', this)"><span class="nav-icon">☀️</span><span class="nav-label">21.06</span></button>
+</nav>
+</div>
+
+<!-- ════════════ PAGE 1: СЕГОДНЯ ════════════ -->
+<div class="page active" id="page-today">
+
+  <div class="today-hero">
+    <div class="today-date">Ежедневно · каждый день</div>
+    <div class="today-title">Сегодняшний ритм</div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Фокус</div>
+    <div class="section-title">Эта неделя</div>
+    <div class="divider"></div>
+    <div class="focus-item"><div class="focus-num">1</div><div class="focus-text">Пост о боте для предпринимателей — до пятницы</div></div>
+    <div class="focus-item"><div class="focus-num">2</div><div class="focus-text">Тренировка — одна функциональная или силовая</div></div>
+    <div class="focus-item"><div class="focus-num">3</div><div class="focus-text">Сайт — доделать и выложить до воскресенья</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Утро · 15–20 мин</div>
+    <div class="section-title">Ритуал</div>
+    <div class="divider"></div>
+    <div class="card" id="ritual-card">
+      <div class="habit-progress" id="ritual-progress"></div>
+      <div class="habit-row"><div class="habit-check" data-habit="r1" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Туалет, умывание</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="r2" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Дыхание</div><div class="habit-note">На пустой желудок. 4 вдох — 4 задержка — 8 выдох, 5–6 раз</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="r3" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Вакуум</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="r4" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Вода</div><div class="habit-note">Только после дыхания и вакуума</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="r5" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">15 мин без телефона</div><div class="habit-note">Разговор с Богом / Вселенной. Благодарность. Прощение. Просьба.</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="r6" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Прочитать визуализацию вслух</div></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">День</div>
+    <div class="section-title">5 шагов</div>
+    <div class="divider"></div>
+    <div class="card" id="steps-card">
+      <div class="habit-progress" id="steps-progress"></div>
+      <div class="habit-row"><div class="habit-check" data-habit="s1" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">10 000 шагов</div><div class="habit-note">Каждый день без исключений</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="s2" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Одно действие для дохода</div><div class="habit-note">Пост, клиент, шаг по продукту</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="s3" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Дневник Беляковой</div><div class="habit-note">Самопрограммирование</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="s4" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Свидание с деньгами</div><div class="habit-note">Вечером 7 мин: доходы/расходы, благодарность, цель</div></div></div>
+      <div class="habit-row"><div class="habit-check" data-habit="s5" onclick="toggleHabit(this)"></div><div class="habit-body"><div class="habit-name">Разговор с телом</div><div class="habit-note">5 мин перед сном. Поблагодарить каждый орган.</div></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Читать каждое утро</div>
+    <div class="section-title">5 аффирмаций</div>
+    <div class="divider"></div>
+    <div class="affirmation"><div class="affirmation-num">01</div><p>Я — блогер-эксперт с живой аудиторией, которая растёт каждую неделю</p></div>
+    <div class="affirmation"><div class="affirmation-num">02</div><p>Я зарабатываю от 200К в месяц своим делом и не завишу от найма</p></div>
+    <div class="affirmation"><div class="affirmation-num">03</div><p>Моё тело сильное, подтянутое, здоровое — я тренируюсь 3 раза в неделю</p></div>
+    <div class="affirmation"><div class="affirmation-num">04</div><p>Я в отношениях с мужчиной который любит и ценит меня</p></div>
+    <div class="affirmation"><div class="affirmation-num">05</div><p>Я живу в своей квартире в Москве с большими окнами рядом с парком</p></div>
+    <div class="viz-box">
+      <div class="viz-text">Я — Альмира Султанова. Предприниматель, блогер, создатель.<br><br>Я зарабатываю 300 000 рублей в месяц от своего дела. Деньги приходят легко, каждый день.<br><br>Я живу в Москве в уютной светлой квартире у парка.<br><br>Моё тело лёгкое, подтянутое, здоровое и энергичное.<br><br>Рядом со мной любящий мужчина. Я открыта и счастлива.<br><br>Меня окружают люди моего уровня. У меня есть мальтипу. Я путешествую.<br><br>Я свободна. Я счастлива. Я на своём месте.<br><br><span style="color:#B8D8CC; font-weight:500">Всё это уже моё.</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Когда накрывает</div>
+    <div class="section-title">Антиблоки</div>
+    <div class="divider"></div>
+    <div class="block-card"><div class="block-trigger">Апатия, ничего не хочется</div><div class="block-action">Минимум дня: аффирмации + 10 мин прогулки + одно действие. Завтра будет ресурс.</div></div>
+    <div class="block-card"><div class="block-trigger">Страх перед публикацией</div><div class="block-action">Опубликовать на 80% — несовершенный пост лучше идеального в голове. 30 подписчиков, не 30 000.</div></div>
+    <div class="block-card"><div class="block-trigger">Тревога за деньги</div><div class="block-action">Прогулка 15 мин. Потом одно действие в сторону дохода. Записать в свидание с деньгами.</div></div>
+    <div class="block-card"><div class="block-trigger">Синдром самозванца</div><div class="block-action">Открыть кейсы: "Тело помнит", агент для Времени, транскрибатор. Ты уже делаешь то чему другие учатся.</div></div>
+    <div class="block-card"><div class="block-trigger">Срыв в питании</div><div class="block-action">Следующий приём еды — чистый. Не с понедельника, не зачёркивать день. Просто следующий.</div></div>
+    <div class="block-card"><div class="block-trigger">Хочется всё переделать</div><div class="block-action">Не трогать план в плохой день. Перечитать образ 31.12.2026 и вернуться к одному действию.</div></div>
+  </div>
+
+</div>
+
+<!-- ════════════ PAGE 2: ЦЕЛИ ════════════ -->
+<div class="page" id="page-goals">
+
+  <div class="section">
+    <div class="section-label">31 декабря 2026</div>
+    <div class="section-title">Образ результата</div>
+    <div class="divider"></div>
+    <div class="vision-box">
+      <div class="vision-text">Я в Москве, в своей квартире с большими окнами у парка. Рядом мужчина. Тело подтянутое, энергии много. Блог живой — 5000 в Instagram, 1000 в Telegram. SULTANOVA AI приносит от 200К в месяц чистыми. Я ИП. Центр Время — в прошлом. Я путешествовала — СПб и море. Накопления есть. Рядом мальтипу. Легко. Свободно.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Сфера 1 · Приоритет</div>
+    <div class="section-title">Тело и здоровье</div>
+    <div class="divider"></div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">🌿</div><div class="sphere-ttl">Цель к 31.12.2026</div></div>
+      <div class="sphere-aim">Сильное, подтянутое, здоровое тело. Энергия с утра.</div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">% жира: с ~29% до 22–25%</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Мышечная масса: тонус, крепкий пресс, сильный кор</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Спорт: 3–4 тренировки в неделю. Классный тренер.</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">10 000 шагов ежедневно</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Тазовое дно: физиотерапевт + упражнения</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Зубы: ровные, белые, здоровые (элайнеры — Q3)</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Кожа лица: поры решить. Увлажнение 2–3 раза/нед.</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">ЖКТ: убрать вздутие, гастроэнтеролог</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Сон: засыпать до 00:00, просыпаться бодрой</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Косметология: 1 процедура в месяц</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Биовозраст: 35 → 30</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Работа со страхом близости — терапия с Настей</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Сфера 2</div>
+    <div class="section-title">Финансы</div>
+    <div class="divider"></div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">💛</div><div class="sphere-ttl">Цель к 31.12.2026</div></div>
+      <div class="sphere-aim">Зарабатываю своим делом. Накопления растут.</div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Доход от 200К чистыми в месяц со своего дела</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Уйти из центра «Время» когда своё даёт 100К+</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Открыть ИП — Q3, июль–август</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Финансовый учёт: свидание с деньгами каждый вечер</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Финграмотность: курс + начать инвестиции</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Финансовая подушка на 6 месяцев</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Накопления 300К+ к концу 2026</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Погасить все долги</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">MacBook Pro 2 ТБ</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">iPhone 18 Pro 1 ТБ — когда выйдет</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">AirPods Pro 4 + Машина</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Сфера 3</div>
+    <div class="section-title">Реализация и бизнес</div>
+    <div class="divider"></div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">✦</div><div class="sphere-ttl">Цель к 31.12.2026</div></div>
+      <div class="sphere-aim">Я публичный эксперт. Ко мне приходят клиенты сами.</div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Instagram: 5 000–7 000 подписчиков (сейчас ~600)</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Telegram: 1 000+ подписчиков (сейчас ~30)</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Контент: минимум 4 единицы в неделю</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Свой сайт — доделать и опубликовать (июнь 2026)</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Первый онлайн-продукт с автопродажами (Q3)</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Обучение: Мария Афонина в Labs + Иван Сергеев</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Ораторское искусство. Читать 1 книгу в месяц.</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Выступления на мероприятиях, медийная личность</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">SULTANOVA AI: АЯ, МИРА, ЭРА — все активны</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Команда: нанять ассистента / джуна (Q3)</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Сфера 4</div>
+    <div class="section-title">Отношения и жизнь</div>
+    <div class="divider"></div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">🌙</div><div class="sphere-ttl">Цель к 31.12.2026</div></div>
+      <div class="sphere-aim">Рядом мужчина. Окружение вдохновляет. Я путешествую.</div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Встретить мужчину — яркая, честная, настоящая любовь</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Убрать страх близости — терапия с Настей</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Яркий, чувственный секс без боли — физиотерапевт для тазового дна</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Новое окружение: блогеры, предприниматели, AI-сообщество</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Путешествия: Санкт-Петербург + море</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Квартира: однушка у метро и парка, большие окна — к сентябрю</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Щеночек мальтипу — @maltipoofficialmsk</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Мероприятия: минимум 2 раза в месяц</div></div>
+      <div class="goal-item"><div class="dot moon"></div><div class="goal-text">Забота о родителях — поездки, помощь, поддержка</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════ PAGE 3: МЕЧТЫ ════════════ -->
+<div class="page" id="page-dreams">
+
+  <div class="section">
+    <div class="section-label">Хочу в жизнь</div>
+    <div class="section-title">Список желаний</div>
+    <div class="divider"></div>
+    <div class="dreams-grid">
+      <div class="dream-card"><div class="dream-ico">🏠</div><div class="dream-cat">Жильё</div><div class="dream-list">Однушка в Москве у парка<br>2-комнатная квартира<br>Свой дом рядом с Москвой</div></div>
+      <div class="dream-card"><div class="dream-ico">💻</div><div class="dream-cat">Техника</div><div class="dream-list">MacBook Pro 2 ТБ<br>iPhone 18 Pro 1 ТБ<br>AirPods Pro 4<br>Машина</div></div>
+      <div class="dream-card"><div class="dream-ico">🐶</div><div class="dream-cat">Питомец</div><div class="dream-list">Мальтипу<br>@maltipoofficialmsk<br>Накопить 100–300К</div></div>
+      <div class="dream-card"><div class="dream-ico">✈️</div><div class="dream-cat">Путешествия</div><div class="dream-list">Санкт-Петербург<br>Море / Турция<br>По миру без ограничений</div></div>
+      <div class="dream-card"><div class="dream-ico">💫</div><div class="dream-cat">Публичность</div><div class="dream-list">Популярный блогер<br>Выступления на сцене<br>Медийная личность</div></div>
+      <div class="dream-card"><div class="dream-ico">💰</div><div class="dream-cat">Финансы</div><div class="dream-list">350К+ в месяц<br>Закрыть долги<br>Подушка 6 мес<br>Инвестиции</div></div>
+      <div class="dream-card"><div class="dream-ico">❤️</div><div class="dream-cat">Любовь</div><div class="dream-list">Мужчина рядом<br>Настоящие отношения<br>Без страха близости</div></div>
+      <div class="dream-card"><div class="dream-ico">💪</div><div class="dream-cat">Тело</div><div class="dream-list">Тело мечты<br>Белые зубы<br>Чистая кожа<br>Энергия весь день</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Масштаб</div>
+    <div class="section-title">Горизонты</div>
+    <div class="divider"></div>
+    <div class="horizon-card"><div class="h-year">2031</div><div class="h-label">5 лет</div><div class="h-text">Своя квартира в Москве. Школа с пассивным доходом. Доход 500К–1М. Путешествую 3–4 раза в год. В счастливых отношениях. Свой дом у Москвы.</div></div>
+    <div class="horizon-card"><div class="h-year">2029</div><div class="h-label">3 года</div><div class="h-text">SULTANOVA AI — команда 3–5 человек. Доход 300–500К. Аудитория 20 000–50 000. Тело мечты, биовозраст 30. Машина. Регулярные путешествия.</div></div>
+    <div class="horizon-card"><div class="h-year">Q3 · 2026</div><div class="h-label">Июль — Сентябрь</div><div class="h-text">ИП. Первый онлайн-продукт. 150–200К. Переехать в Москву. Тренер, зал. Консультация по зубам. Ассистент.</div></div>
+    <div class="horizon-card"><div class="h-year">Q4 · 2026</div><div class="h-label">Октябрь — Декабрь</div><div class="h-text">200–300К. Автоворонка. Накопления 300К+. Telegram 1000+, Instagram 5000–7000. Элайнеры — начать.</div></div>
+  </div>
+
+</div>
+
+<!-- ════════════ PAGE 4: Я ════════════ -->
+<div class="page" id="page-me">
+
+  <div class="section">
+    <div class="section-label">Идентичность</div>
+    <div class="section-title">Кто я</div>
+    <div class="divider"></div>
+    <div class="identity-box">
+      <div class="id-name">Архитектор вайба · Маг · Навигатор</div>
+      <div class="id-line">Строю AI-системы с душой. Объясняю сложное просто.</div>
+      <div class="id-line">Прошла склад Озон в 4:30 утра — вышла с ясностью</div>
+      <div class="id-line">МГ 3/5 · Сакральный авторитет · Год Луны 2026</div>
+      <div class="id-line">Скорпион · Матрица: кризис-менеджер + инноватор</div>
+      <div class="id-line">Архетип бренда: Ведьма × Системный философ × Женщина-свет</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Смысл</div>
+    <div class="section-title">Зачем всё это</div>
+    <div class="divider"></div>
+    <div class="values-grid">
+      <div class="val-card"><div class="val-word">Свобода</div><div class="val-desc">Жить на своих условиях. Не объяснять зачем.</div></div>
+      <div class="val-card"><div class="val-word">Лёгкость</div><div class="val-desc">Когда клёво и легко — это и есть цель.</div></div>
+      <div class="val-card"><div class="val-word">Смысл</div><div class="val-desc">Помогать людям с теплом и настоящим вкладом.</div></div>
+      <div class="val-card"><div class="val-word">Себя</div><div class="val-desc">Чувствовать себя собой. Не для других.</div></div>
+    </div>
+    <div class="phrase-box">
+      <div class="phrase-text">"Не нужно быть сильной.<br>Нужно быть настоящей."</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Уже есть</div>
+    <div class="section-title">Мои сильные стороны</div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-label teal">Суперсила</div>
+      <p style="margin-bottom:14px; font-size:14px;">"Я женщина, которой пришлось выживать — и это моё супероружие."</p>
+      <div class="strength-item"><div class="s-ico">🧠</div><div class="s-text">Объясняю сложное простым языком — без пафоса, с примерами</div></div>
+      <div class="strength-item"><div class="s-ico">🔮</div><div class="s-text">Чувствую людей тонко, слышу несказанное, действую точно</div></div>
+      <div class="strength-item"><div class="s-ico">⚡</div><div class="s-text">Превращаю хаос в план — системное мышление</div></div>
+      <div class="strength-item"><div class="s-ico">🌊</div><div class="s-text">Не ломаюсь — перетекаю. Держусь когда рушится.</div></div>
+      <div class="strength-item"><div class="s-ico">✨</div><div class="s-text">Строю живые AI-системы с характером — не инструменты, а команду</div></div>
+      <div class="strength-item"><div class="s-ico">🏗</div><div class="s-text">Знаю изнутри как встать с нуля без паники</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Твой ритм · МГ</div>
+    <div class="section-title">Восстановление</div>
+    <div class="divider"></div>
+    <div class="rest-grid">
+      <div class="rest-card"><div class="rest-ico">⚡</div><div class="rest-lbl">Заряжает</div><div class="rest-text">Движение, новые люди, природа, музыка, создавать новое</div></div>
+      <div class="rest-card"><div class="rest-ico">🌊</div><div class="rest-lbl">Восполняет</div><div class="rest-text">Еда, сон, спорт, ванна, тишина утром, психология</div></div>
+      <div class="rest-card"><div class="rest-ico">🔴</div><div class="rest-lbl">Сигнал стоп</div><div class="rest-text">Всё раздражает, хочется лежать, нет сил — это сигнал, не лень</div></div>
+      <div class="rest-card"><div class="rest-ico">✅</div><div class="rest-lbl">Минимум дня</div><div class="rest-text">Аффирмации + 10 мин прогулки + одно действие</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════ PAGE 5: ПЛАН ════════════ -->
+<div class="page" id="page-plan">
+
+  <div class="section">
+    <div class="section-label">Как и о чём</div>
+    <div class="section-title">Три столпа контента</div>
+    <div class="divider"></div>
+    <div class="pillar-card">
+      <div class="p-num">Столп I</div>
+      <div class="p-title">Внутренняя система</div>
+      <div class="p-text">Почему человек застревает. Как психика саботирует рост. Как встроить новое поведение.</div>
+      <div class="p-ideas">
+        <div class="p-idea">· "Вы всё понимаете, но не делаете — разбор"</div>
+        <div class="p-idea">· "Как тело саботирует рост дохода"</div>
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="p-num">Столп II</div>
+      <div class="p-title">AI и работа</div>
+      <div class="p-text">Как из AI сделать инструмент дохода. Вайбкодинг. Как внедрять, а не просто изучать.</div>
+      <div class="p-ideas">
+        <div class="p-idea">· "Я создала бота для предпринимателей — вот как"</div>
+        <div class="p-idea">· "Почему AI не работает без системности"</div>
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="p-num">Столп III</div>
+      <div class="p-title">Личная история</div>
+      <div class="p-text">Склад, кассовый разрыв, точка нуля. Как выстроить доход после провала. Твоя история — твоя сила.</div>
+      <div class="p-ideas">
+        <div class="p-idea">· "Я работала на складе Озон в 4:30 утра"</div>
+        <div class="p-idea">· "Как я вышла из точки нуля"</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Ближайшие 3 месяца</div>
+    <div class="section-title">Первые клиенты</div>
+    <div class="divider"></div>
+    <div class="step-item"><div class="step-num">1</div><div class="step-body"><div class="step-title">Написать 10–15 знакомым</div><div class="step-desc">Не в лоб. Поинтересоваться делами, упомянуть что делаешь сайты и AI-системы.</div></div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-body"><div class="step-title">Закрыть 2–3 первых проекта</div><div class="step-desc">Сайт от 10К — точка входа. AI-агент — от 30К голый, от 100К под ключ.</div></div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-body"><div class="step-title">Использовать готовые кейсы</div><div class="step-desc">"Тело помнит" и "Агент для центра Время" — реальное портфолио.</div></div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-body"><div class="step-title">Пост о боте — входящий поток</div><div class="step-desc">До пятницы 26 июня. Первый публичный шаг который показывает экспертность.</div></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Среда влияет на поток</div>
+    <div class="section-title">Порядок</div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-label warm">Физический</div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Коридор</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Шкафы с одеждой</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Книжный шкаф, верхние полки, стеллаж</div></div>
+    </div>
+    <div class="card">
+      <div class="card-label lilac">Цифровой</div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Компьютер — рабочий стол, файлы, папки</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Телефон — приложения, галерея, заметки</div></div>
+      <div class="goal-item"><div class="dot lilac"></div><div class="goal-text">Соцсети и браузеры — архив, подписки, закладки</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════ PAGE 6: СОЛНЦЕСТОЯНИЕ ════════════ -->
+<div class="page" id="page-solstice">
+
+  <div class="section">
+    <div class="section-label">Память · 21 июня 2026</div>
+    <div class="section-title">Летнее солнцестояние</div>
+    <div class="divider"></div>
+    <div class="vision-box" style="text-align:center; padding:24px 20px;">
+      <div style="font-size:36px; margin-bottom:10px">☀️</div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:400; color:#2C2320; margin-bottom:8px">21 июня 2026</div>
+      <div style="font-size:11px; color:#7A6370; letter-spacing:0.12em; text-transform:uppercase">Самый длинный день · Переход · Воскресенье</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Список 1 · Отпускаю</div>
+    <div class="section-title">Что не беру с собой</div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-label warm">Больше не моё</div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Центр психологии «Время» как моя работа</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Страх публичности, отвержения, быть непринятой, не понравиться, показаться глупой или навязчивой</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Паттерн замирать — прятать голову в песок, избегать, останавливаться</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Страх продавать и рассказывать о своих продуктах и услугах</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Паттерн: планировать, но не начинать или не заканчивать</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Поздно ложиться, спать до 12, начинать дела только вечером</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Заедать эмоции — сладкое когда грустно, вредная еда как реакция на состояние</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Жертвенность, нытьё, жалобы на обстоятельства</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Ощущение скованности, зажатости, одиночества</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Люди которые не поддерживают, тянут в плохое состояние</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Паттерн ставить себя на второе место — сначала отдавать ресурс другим</div></div>
+      <div class="goal-item"><div class="dot warm"></div><div class="goal-text">Молчать, замалчивать, позволять нарушать мои границы</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Список 2 · Зову</div>
+    <div class="section-title">Что зову в жизнь</div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-label teal">Моё на следующие полгода</div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Мужчина. Любовь яркая, настоящая, честная. Уважает, ценит, смотрим в одном направлении</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Клиенты — настоящие предприниматели которым делаю сайты и AI-системы</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Деньги от 300К в месяц чистыми. Приходят в лёгкости — клиенты находят меня сами</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Новое окружение — где меня ценят, слышат, где я могу быть собой</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Обучение у Марии Афониной в Labs и у Ивана Сергеева</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Квартира в Москве — однушка у метро, большие окна, рядом парк и пруды</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Правильное питание, ЗОЖ, ежедневное движение, спортзал</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">MacBook Pro 2 ТБ</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Здоровье, энергия. Просыпаюсь бодрой, засыпаю легко. Целостная, женственная, собой</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Состояние лёгкости и реализации — я публична, веду блог, отзываюсь в душах людей</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Путешествия — Санкт-Петербург и море</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Новые проекты, партнёрства, идеи — где я раскрываюсь иначе</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Классный тренер. Сильное тело, крепкий пресс, кор, мышечная масса</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Ровные белые здоровые зубы</div></div>
+      <div class="goal-item"><div class="dot teal"></div><div class="goal-text">Публичность — я блогер, эксперт, ко мне приходят клиенты</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Осознание дня</div>
+    <div class="section-title">Что тормозило</div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-label lilac">Мои слова · 21.06.2026</div>
+      <p>Страх действовать — и поэтому не действовала. Не вышла в блог, не вышла в продажи, избегала соцсетей и партнёрств. Выстраивала структуру, но не придерживалась. Планировала масштабно, пыталась довести до идеала — и не делала вообще ничего. Центр Время держу только ради денег, и это предательство себя. Апатия, избегание, ресурс в других, а не в своём.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Намерения · 21.06.2026</div>
+    <div class="section-title">Следующие полгода</div>
+    <div class="divider"></div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">🌿</div><div class="sphere-ttl">Тело</div></div>
+      <div class="sphere-aim">Спорт 3 раза в неделю. % жира до 25, мышечная масса, убрать живот. Сильное, подтянутое, здоровое тело.</div>
+    </div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">💛</div><div class="sphere-ttl">Финансы</div></div>
+      <div class="sphere-aim">Доход от 200К чистыми со своего дела. Вести финансовый учёт. Оформить ИП.</div>
+    </div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">✦</div><div class="sphere-ttl">Реализация</div></div>
+      <div class="sphere-aim">Свой сайт. Блог с 5000 подписчиков. Чувствовать себя блогером и экспертом.</div>
+    </div>
+    <div class="sphere-card">
+      <div class="sphere-hd"><div class="sphere-ico">🌙</div><div class="sphere-ttl">Отношения</div></div>
+      <div class="sphere-aim">Встретить мужчину. Глубокие отношения без страха близости. Яркий, чувственный секс без боли и зажатости.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Первые шаги · неделя 21–28.06</div>
+    <div class="section-title">Три действия</div>
+    <div class="divider"></div>
+    <div class="focus-item"><div class="focus-num">1</div><div class="focus-text">Пост о боте для предпринимателей — до пятницы</div></div>
+    <div class="focus-item"><div class="focus-num">2</div><div class="focus-text">Тренировка — функциональная или силовая</div></div>
+    <div class="focus-item"><div class="focus-num">3</div><div class="focus-text">Сайт — доделать и выложить до воскресенья</div></div>
+  </div>
+
+</div>
+
+
+<script>
+  // ── 1. ВКЛАДКИ (с памятью) ──
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + tab).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo(0, 0);
+    try { localStorage.setItem('era_last_tab', tab); } catch(e) {}
+  }
+
+  function restoreTab() {
+    try {
+      const saved = localStorage.getItem('era_last_tab');
+      if (saved && document.getElementById('page-' + saved)) {
+        const btn = document.querySelector('[onclick*="switchTab(\'' + saved + '\'"]');
+        if (btn) switchTab(saved, btn);
+      }
+    } catch(e) {}
+  }
+
+  // ── 2. ОБРАТНЫЙ ОТСЧЁТ ──
+  function initCountdown() {
+    const el = document.getElementById('app-countdown');
+    if (!el) return;
+    const now = new Date();
+    const target = new Date('2026-12-31');
+    const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+    el.textContent = 'До 31.12.2026 · ' + diff + ' дн';
+  }
+
+  // ── 3. ЧЕКБОКСЫ (с памятью и авто-сбросом) ──
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+  }
+
+  function getHabits() {
+    try {
+      const data = JSON.parse(localStorage.getItem('era_habits') || '{}');
+      if (data.date !== todayKey()) return {};
+      return data.checked || {};
+    } catch(e) { return {}; }
+  }
+
+  function saveHabits(checked) {
+    try {
+      localStorage.setItem('era_habits', JSON.stringify({ date: todayKey(), checked }));
+    } catch(e) {}
+  }
+
+  function updateProgress(groupPrefix, total, progressId) {
+    const checked = getHabits();
+    let done = 0;
+    for (let i = 1; i <= total; i++) {
+      if (checked[groupPrefix + i]) done++;
+    }
+    const el = document.getElementById(progressId);
+    if (el) {
+      if (done === total) {
+        el.textContent = '✓ Всё выполнено сегодня';
+        el.style.color = '#B8D8CC';
+      } else if (done === 0) {
+        el.textContent = '';
+      } else {
+        el.textContent = done + ' / ' + total + ' выполнено';
+      }
+    }
+  }
+
+  function toggleHabit(el) {
+    const id = el.dataset.habit;
+    const checked = getHabits();
+    checked[id] = !checked[id];
+    saveHabits(checked);
+
+    el.classList.toggle('checked', !!checked[id]);
+    const row = el.closest('.habit-row');
+    if (row) row.classList.toggle('done', !!checked[id]);
+
+    updateProgress('r', 6, 'ritual-progress');
+    updateProgress('s', 5, 'steps-progress');
+  }
+
+  function initHabits() {
+    const checked = getHabits();
+    document.querySelectorAll('.habit-check[data-habit]').forEach(el => {
+      const id = el.dataset.habit;
+      if (checked[id]) {
+        el.classList.add('checked');
+        const row = el.closest('.habit-row');
+        if (row) row.classList.add('done');
+      }
+    });
+    updateProgress('r', 6, 'ritual-progress');
+    updateProgress('s', 5, 'steps-progress');
+  }
+
+  // ── 4. АККОРДЕОН ──
+  function initAccordion() {
+    document.querySelectorAll('.section').forEach(section => {
+      const children = Array.from(section.children);
+      const headerEls = children.filter(el =>
+        el.classList.contains('section-label') ||
+        el.classList.contains('section-title') ||
+        el.classList.contains('divider')
+      );
+      const bodyEls = children.filter(el =>
+        !el.classList.contains('section-label') &&
+        !el.classList.contains('section-title') &&
+        !el.classList.contains('divider')
+      );
+
+      if (bodyEls.length === 0 || headerEls.length === 0) return;
+
+      const header = document.createElement('div');
+      header.className = 'section-header';
+      headerEls.forEach(el => header.appendChild(el));
+
+      const titleEl = header.querySelector('.section-title');
+      if (titleEl) {
+        const row = document.createElement('div');
+        row.className = 'section-title-row';
+        const titleClone = titleEl.cloneNode(true);
+        const arrow = document.createElement('span');
+        arrow.className = 'section-arrow';
+        arrow.textContent = '▾';
+        row.appendChild(titleClone);
+        row.appendChild(arrow);
+        titleEl.replaceWith(row);
+      }
+
+      const body = document.createElement('div');
+      body.className = 'section-body';
+      bodyEls.forEach(el => body.appendChild(el));
+
+      section.appendChild(header);
+      section.appendChild(body);
+
+      header.addEventListener('click', () => {
+        body.classList.toggle('closed');
+        const arrow = header.querySelector('.section-arrow');
+        if (arrow) arrow.classList.toggle('closed');
+      });
+    });
+  }
+
+  // ── INIT ──
+  document.addEventListener('DOMContentLoaded', () => {
+    initCountdown();
+    initHabits();
+    initAccordion();
+    restoreTab();
+  });
+</script>
+
+</body>
+</html>

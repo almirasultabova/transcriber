@@ -6,6 +6,7 @@
   },
   "rewrites": [
     { "source": "/api/transcribe", "destination": "/api/transcribe" },
+    { "source": "/goals", "destination": "/goals.html" },
     { "source": "/", "destination": "/index.html" }
   ]
 }
